@@ -1,31 +1,26 @@
 [dashboard]
-title = Ironic Inbox
-description = Ironic Review Inbox
-foreach = (project:openstack/ironic OR project:openstack/python-ironicclient OR project:openstack/ironic-python-agent OR project:openstack/ironic-specs OR project:openstack/ironic-lib OR project:openstack/ironic-inspector OR project:openstack/ironic-webclient OR project:openstack/bifrost) status:open NOT label:Code-Review<=-2
+title = Ironic Review Dashboard
+description = Ironic patches to review
+foreach = (project:openstack/ironic OR project:openstack/python-ironicclient OR project:openstack/ironic-python-agent OR project:openstack/ironic-specs OR project:openstack/ironic-lib OR project:openstack/ironic-inspector OR project:openstack/ironic-webclient OR project:openstack/bifrost) status:open NOT label:Code-Review<=-2 NOT label:Workflow<=-1 is:mergeable
 
-[section "My Patches Requiring Attention"]
-query = owner:self (label:Verified-1,jenkins OR label:Code-Review-1 OR label:Workflow<=-1)
+[Section "Starred (by PTL or myself)"]
+query = (starredby:jimrollenhagen OR is:starred) AND status:open
+
+[section "Small things"]
+query = delta:<=25 limit:10 (NOT label:Code-Review-1,ironic-core OR (label:Code-Review-1,ironic-python-agent-core AND project:openstack/ironic-python-agent) OR (label:Code-Review-1,ironic-inspector-core AND project:openstack/ironic-inspector)) label:Verified>=1,jenkins branch:master
+
+[section "Needs Final Approval (to land on master)"]
+query = NOT label:Workflow>=1 NOT label:Workflow<=-1 NOT owner:self label:Code-Review>=2 label:Verified>=1,jenkins (NOT label:Code-Review-1,ironic-core OR (label:Code-Review-1,ironic-python-agent-core AND project:openstack/ironic-python-agent)) NOT project:openstack/ironic-specs branch:master
+
+[section "Open Backport Proposals"]
+query = NOT project:openstack/ironic-specs branch:^stable/.* status:open
+
+[section "Recently Proposed to master"]
+query = -age:1week limit:25 branch:master NOT label:Workflow>=1 (NOT label:Code-Review-1,ironic-core OR (label:Code-Review-1,ironic-python-agent-core AND project:openstack/ironic-python-agent) OR (label:Code-Review-1,ironic-inspector-core AND project:openstack/ironic-inspector)) label:Verified>=1,jenkins NOT label:Code-Review>=2 NOT project:openstack/ironic-specs
+
+[section "Older open patches"]
+query = age:1week limit:50 NOT label:Workflow>=1 NOT label:Code-Review<=2 age:1week NOT project:openstack/ironic-specs (NOT label:Code-Review-1,ironic-core OR (label:Code-Review-1,ironic-python-agent-core AND project:openstack/ironic-python-agent) OR (label:Code-Review-1,ironic-inspector-core AND project:openstack/ironic-inspector))
 
 [section "Ironic Specs"]
-query = NOT label:Workflow>=1 NOT owner:self project:openstack/ironic-specs
+query = project:openstack/ironic-specs NOT label:Code-Review<=-2
 
-[section "Needs Approval"]
-query = NOT label:Workflow>=1 NOT label:Workflow<=-1 label:Verified>=1,jenkins NOT owner:self label:Code-Review>=2 NOT label:Code-Review-1
-
-[section "Needs Reverify"]
-query = label:Workflow>=1 NOT label:Workflow<=-1 label:Verified<=-1,jenkins
-
-[section "5 Days Without Feedback"]
-query = NOT label:Workflow>=1 NOT label:Workflow<=-1 label:Verified>=1,jenkins NOT owner:self NOT project:openstack/ironic-specs NOT label:Code-Review<=2 age:5d
-
-[section "No Negative Feedback (top 50)"]
-query = NOT label:Workflow>=1 NOT label:Workflow<=-1 label:Verified>=1,jenkins NOT owner:self NOT project:openstack/ironic-specs NOT label:Code-Review<=-1 NOT label:Code-Review>=2 limit:50
-
-[section "With Negative Feedback (top 20)"]
-query = NOT label:Workflow<=-1 NOT label:Verified<=-1,jenkins NOT owner:self NOT project:openstack/ironic-specs label:Code-Review-1 limit:20
-
-[section "Unreviewed, not WIP (top 20)"]
-query = NOT label:Code-Review<=2 NOT label:Workflow<=-1 NOT project:openstack/ironic-specs limit:20
-
-[section "Work In Progress Or Unverified (top 20)"]
-query = NOT label:Workflow>=1 NOT owner:self (label:Workflow<=-1 OR label:Verified<=-1,jenkins) limit:20
